@@ -8,7 +8,7 @@ import { ProductCard } from "./components/ProductCard";
 import { Cart } from "./components/Cart";
 import { useCart } from "./hooks/useCart";
 
-const API = "http://localhost:5000/api/products";
+const API = "https://shoopp.onrender.com";
 
 export default function App() {
   const { cart, addToCart, removeFromCart, updateQty, total, count } =

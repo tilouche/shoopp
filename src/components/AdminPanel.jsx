@@ -2,7 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import { supabase } from "../lib/supabase";
 
-const API = "http://localhost:5000/api/products";
+const API = "https://shoopp.onrender.com";
 
 export default function AdminPanel({ refresh }) {
   const [form, setForm] = useState({

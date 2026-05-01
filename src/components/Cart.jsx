@@ -1,7 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 
-const API = "http://localhost:5000/api/orders";
+const API = "https://shoopp.onrender.com";
 updateQty(item.id, item.qty + 1)
 
 export function Cart({

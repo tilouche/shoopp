@@ -1,7 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 
-const API = "http://localhost:5000/api/products";
+const API = "https://shoopp.onrender.com";
 
 export function ProductCard({ product, onAdd }) {
   const colorKeys = product?.colors ? Object.keys(product.colors) : [];
