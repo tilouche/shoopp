@@ -3,70 +3,66 @@ import { useState } from "react";
 export function useCart() {
   const [cart, setCart] = useState([]);
 
-  // 🛒 ADD TO CART
   const addToCart = (product, size, color) => {
-    const uniqueId = `${product.id}-${size}-${color}`;
+    if (!size || !color) return;
 
-    const existing = cart.find((item) => item.id === uniqueId);
+    const cartItemId = `${product.id}-${size}-${color}`;
 
-    if (existing) {
-      setCart((prev) =>
-        prev.map((item) =>
-          item.id === uniqueId
-            ? { ...item, qty: item.qty + 1 }
-            : item
-        )
-      );
-    } else {
-      setCart((prev) => [
+    setCart((prev) => {
+      const index = prev.findIndex((p) => p.cartItemId === cartItemId);
+
+      if (index !== -1) {
+        const updated = [...prev];
+        updated[index].quantity += 1;
+        return updated;
+      }
+
+      return [
         ...prev,
         {
-          id: uniqueId,
-          productId: product.id,
-          name: product.name,
-          price: product.price,
-          image: product.image,
-          size,
-          color,
-          qty: 1,
+          ...product,
+          selectedSize: size,
+          selectedColor: color,
+          cartItemId,
+          quantity: 1,
         },
-      ]);
-    }
+      ];
+    });
   };
 
-  // 🔄 UPDATE QTY
-  const updateQty = (id, qty) => {
-    if (qty <= 0) {
-      removeFromCart(id);
-      return;
-    }
-
+  const removeFromCart = (cartItemId) => {
     setCart((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, qty } : item
-      )
+      prev.filter((item) => item.cartItemId !== cartItemId)
     );
   };
 
-  // 🗑 REMOVE
-  const removeFromCart = (id) => {
-    setCart((prev) => prev.filter((item) => item.id !== id));
+  const updateQty = (cartItemId, qty) => {
+    setCart((prev) =>
+      prev
+        .map((item) =>
+          item.cartItemId === cartItemId
+            ? { ...item, quantity: qty }
+            : item
+        )
+        .filter((item) => item.quantity > 0)
+    );
   };
 
-  // 💰 TOTAL
   const total = cart.reduce(
-    (sum, item) => sum + item.price * item.qty,
+    (sum, i) => sum + i.price * i.quantity,
     0
   );
 
-  // 🔢 COUNT
-  const count = cart.reduce((sum, item) => sum + item.qty, 0);
+  const count = cart.reduce(
+    (sum, i) => sum + i.quantity,
+    0
+  );
 
   return {
     cart,
     addToCart,
-    updateQty,
     removeFromCart,
+    updateQty,
     total,
     count,
   };

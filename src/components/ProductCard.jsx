@@ -1,59 +1,38 @@
 import { useState } from "react";
-import axios from "axios";
-
-const API = "https://shoopp.onrender.com";
-
 export function ProductCard({ product, onAdd }) {
+
   const colorKeys = product?.colors ? Object.keys(product.colors) : [];
-
-  const [selectedColor, setSelectedColor] = useState(
-    colorKeys[0] || ""
-  );
-
+  const [selectedColor, setSelectedColor] = useState(colorKeys[0]||"");
   const [current, setCurrent] = useState(0);
   const images = selectedColor ? product.colors[selectedColor] : [];
 
-  const [selectedSize, setSelectedSize] = useState("");
   const [error, setError] = useState("");
 
+  const [selectedSize, setSelectedSize] = useState("");
   const sizes = ["S", "M", "L", "XL", "XXL"];
-
-  // ➡️ next image
   const next = () => {
     setCurrent((prev) =>
       prev === images.length - 1 ? 0 : prev + 1
     );
   };
 
-  // ⬅️ prev image
   const prev = () => {
     setCurrent((prev) =>
       prev === 0 ? images.length - 1 : prev - 1
     );
   };
 
-  // 🗑️ delete product (admin)
-  const deleteProduct = async () => {
-    try {
-      await axios.delete(`${API}/${product.id}`);
-      window.location.reload(); // later نبدلوها refresh state
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
   return (
     <div className="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition w-65">
-
-      {/* 🖼️ IMAGE (SUPABASE READY) */}
+      
+      {/* IMAGE */}
       <div className="relative">
         <img
-          src={product.image}
+          src={images[current]}
           alt={product.name}
-          className="w-full h-48 object-cover"
+          className="w-full h-77 object-cover"
         />
 
-        {/* arrows فقط إذا عندك colors images */}
         {images.length > 1 && (
           <>
             <button
@@ -72,57 +51,58 @@ export function ProductCard({ product, onAdd }) {
           </>
         )}
       </div>
+      
 
-      {/* COLORS */}
-      {colorKeys.length > 0 && (
-        <div className="flex gap-2 p-2 justify-center">
-          {colorKeys.map((color) => (
-            <button
-              key={color}
-              onClick={() => {
-                setSelectedColor(color);
-                setCurrent(0);
-              }}
-              className={`w-6 h-6 rounded-full border-2 ${
-                selectedColor === color
-                  ? "border-black"
-                  : "border-gray-300"
-              }`}
-              style={{ backgroundColor: color }}
-            />
-          ))}
-        </div>
-      )}
-
-      {/* SIZES */}
-      <div className="mt-2 px-3">
-        <div className="flex gap-2 flex-wrap justify-center">
-          {sizes.map((size) => (
-            <button
-              key={size}
-              onClick={() => {
-                setSelectedSize(size);
-                setError("");
-              }}
-              className={`px-3 py-1 border rounded-full text-sm transition ${
-                selectedSize === size
-                  ? "bg-black text-white border-black"
-                  : "bg-white hover:bg-gray-100"
-              }`}
-            >
-              {size}
-            </button>
-          ))}
-        </div>
-
-        {error && (
-          <p className="text-red-500 text-sm mt-2 text-center">
-            ⚠️ {error}
-          </p>
-        )}
+      {/* 🎨 COLORS */}
+      <div className="flex gap-2 p-2 justify-center">
+        {colorKeys.map((color) => (
+          <button
+            key={color}
+            onClick={() => {
+              setSelectedColor(color);
+              setCurrent(0);
+            }}
+            className={`w-6 h-6 rounded-full border-2 ${
+              selectedColor === color ? "border-black" : "border-gray-300"
+            }`}
+            style={{ backgroundColor: color }}
+          />
+        ))}
       </div>
+        {/* size */}
+      <div className="mt-4">
+  <h4 className="font-semibold mb-2">Taille</h4>
 
-      {/* INFO */}
+  <div className="flex gap-2 flex-wrap">
+    {sizes.map((size) => (
+      <button
+        key={size}
+        onClick={() => {
+          setSelectedSize(size);
+          setError(""); // يمسح error وقت الاختيار
+        }}
+        className={`px-4 py-2 border rounded-full transition-all duration-200
+          ${
+            selectedSize === size
+              ? "bg-black text-white scale-105 border-black"
+              : "bg-white text-black hover:bg-gray-100 border-gray-300"
+          }
+        `}
+      >
+        {size}
+      </button>
+    ))}
+  </div>
+
+  {/* 🔴 error message */}
+  {error && (
+    <p className="text-red-500 text-sm mt-2 animate-pulse">
+      ⚠️ {error}
+    </p>
+  )}
+</div>
+
+      {/* 📦 INFO */}
       <div className="p-4">
         <span className="text-xs text-green-600 font-semibold uppercase">
           {product.category}
@@ -137,39 +117,29 @@ export function ProductCard({ product, onAdd }) {
         </p>
 
         <div className="flex items-center justify-between mt-4">
-          <span className="text-xl font-bold">
+          <span className="text-xl font-bold text-gray-800">
             {product.price} DT
           </span>
 
-          {/* ADD TO CART */}
-          <button
-            onClick={() => {
-              if (!selectedSize) {
-                setError("Choisis une taille !");
-                return;
-              }
+         <button
+  onClick={() => {
+    if (!selectedSize) {
+      setError("⚠️ Choisis une taille !");
+      return;
+    }
 
-              if (!selectedColor && colorKeys.length > 0) {
-                setError("Choisis une couleur !");
-                return;
-              }
+    if (!selectedColor) {
+      setError("⚠️ Choisis une couleur !");
+      return;
+    }
 
-              setError("");
-
-              onAdd(product, selectedSize, selectedColor);
-            }}
-            className="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-xl text-sm"
-          >
-            Add to Cart
-          </button>
-
-          {/* DELETE */}
-          <button
-            onClick={deleteProduct}
-            className="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-xl text-sm ml-2"
-          >
-            Delete
-          </button>
+    setError("");
+    onAdd(product, selectedSize, selectedColor);
+  }}
+  className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-xl text-sm font-semibold transition"
+>
+  Ajouter au Panier
+</button>
         </div>
       </div>
     </div>
